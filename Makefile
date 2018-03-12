@@ -1,12 +1,13 @@
 #Terrible makefile, copied from online and modified to use dfu-programmer
 # https://gist.github.com/holachek/3304890
-# DO NOT COPY.
+# DO NOT COPY WHOLESALE
+# The DFU section is from TMK
 
 # MCU ....... The AVR device you compile for
-# CLOCK ........ Target AVR clock rate in Hertz
+# F_CPU ........ Target AVR clock rate in Hertz
 
 MCU     = at90usb1287
-CLOCK      = 8000000UL
+F_CPU      = 8000000
 TARGET    = blink
 
 
@@ -15,7 +16,7 @@ TARGET    = blink
 
 # Tune the lines below only if you know what you are doing:
 
-COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(MCU)
+COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) -mmcu=$(MCU)
 
 # symbolic targets:
 all:	$(TARGET).hex
@@ -33,7 +34,15 @@ all:	$(TARGET).hex
 .c.s:
 	$(COMPILE) -S $< -o $@
 
-flash:	all
+.PHONY: dfu
+dfu: all
+	@echo -n dfu-programmer: waiting, press rst+hwb, release rst, release hwb
+	@echo
+	@until dfu-programmer $(MCU) get bootloader-version > /dev/null 2>&1; do \
+		echo  -n "."; \
+		sleep 1; \
+	done
+	@echo
 	dfu-programmer $(MCU) erase
 	dfu-programmer $(MCU) flash $(TARGET).hex
 	dfu-programmer $(MCU) reset
