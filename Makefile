@@ -7,7 +7,7 @@
 # F_CPU ........ Target AVR clock rate in Hertz
 
 MCU     = at90usb1287
-F_CPU      = 8000000
+F_CPU      = 1000000
 TARGET    = blink
 
 
